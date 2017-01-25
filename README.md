@@ -1,5 +1,7 @@
-Classy Mixer
-------------
+#Classy Mixer
+
+Overview and Capabilities:
+-------------------------
 Created by Patrick Greene
 
 This is a project to create an ipython (for now) tool for creating playlists 
@@ -51,6 +53,11 @@ Usage Example:
 Suppose you want to create a playlist on google play, you would enter the ipython
 environment and type:
 
-import classyMixer
-mixer = classyMixer.ClassyMixer() # You will be prompted for username and password, and it will then complain the Python 3 is better.
-mixer.mix('Classy playlist', 100, genre='Classical')
+```python
+  import classyMixer
+  mixer = classyMixer.ClassyMixer() # You will be prompted for username and password, and it will then complain the Python 3 is better.
+  mixer.mix('Classy playlist', 100, genre='Classical')
+```
+
+and that's it. You have created a playlist with 100 pieces (not 100 tracks) using 
+only music marked as genre 'Classical' in the song metadata.
