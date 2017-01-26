@@ -21,15 +21,15 @@ there are some that shouldn't be together but are, however it works very well
 for the most part, working on my music collection. Some labels that it should
 recognize:
   
-  Sympony No. 2: I. Adagio
+-Sympony No. 2: I. Adagio
   
-  Strawinsky: The Right of Spring: Introduction
+-Strawinsky: The Right of Spring: Introduction
   
-  Quartet in A - Minuet
+-Quartet in A - Minuet
 
 and this is an example of something that might confuse it:
   
-  Quartet in A - Minuet - Trio
+-Quartet in A - Minuet - Trio
 
 Of course for a music shuffler, especially of classical music, it is not critical
 that every piece remain together, however I do try my best.
