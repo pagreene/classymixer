@@ -47,6 +47,8 @@ the file(s), however there are some requirements
 - gmusicapi (if you want to use google play)
 - pytaglib (if you want to run the shuffler on a local file library)
 
+To install gmusicapi, I recommend that you download their development version [here](https://github.com/simon-weber/gmusicapi) and run `setup.py`. I have found that using `pip install` is unreliable.
+
 Usage Example:
 -------------
 
