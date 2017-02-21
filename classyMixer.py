@@ -5,6 +5,10 @@ import re
 class ClassyMixer(object):
     '''
     An object for managing music and looking through track info using regex.
+    
+    mixer = ClassyMixer(collection)
+    
+    where "collection" is selected from one of the collections available in songLibs.
     '''
     def __init__(self, collection):
         if not issubclass(collection, Collection):
@@ -17,6 +21,16 @@ class ClassyMixer(object):
                
         # Load the list of playlists
         self.playlists = self.collection.loadPlaylists()
+        
+        # Define the regex patterns to pick out movements of larger pieces.
+        self.pattList = []
+        # With numbers (including roman numerals)
+        self.pattList.append(re.compile("(.*) *?(?:[-:]|^) *?(\d+)[.:]? *?(.*)$"))
+        self.pattList.append(re.compile("(.*) *?(?:[-:]|^) *?([IVX]+)[^\w]+?(\w+.*)$"))
+        # Without numbers
+        self.pattList.append(re.compile("(.*) *?([:;]) *?(\w+.*)$"))
+        self.pattList.append(re.compile("(.*)( +?- *?| *?- +?)(\w+.*)$"))
+        
         return
     
     def update(self):
@@ -41,7 +55,7 @@ class ClassyMixer(object):
             # If any of the criteria are not met...
             for label, crit in criteria.iteritems():
                 # determine if it matches
-                data = song[label]
+                data = song.__getattribute__(label)
                 if isinstance(crit, re._pattern_type):
                     itMatches = (crit.match(data) is not None)
                 else:
@@ -49,9 +63,48 @@ class ClassyMixer(object):
                 
                 if not itMatches:
                     break # Do nothing
-            else: # Add the song to the list
+            else: # Otherwise, add the song to the list
                 songList.append(song)
         return songList
+    
+    def analyzeTitle(self, song, pattList):
+        '''
+        Uses RegEx to analyze the title and extract valuable features.
+        
+        INPUTS:
+        title -- the title of a song
+        
+        OUTPUTS:
+        titleList -- a tuple with the items from the title
+        '''
+        # Get the matches to the patterns. Only keep the ones where we
+        # actually got a match.
+        matchList = []
+        for i, patt in enumerate(pattList):
+            match = patt.match(song.mvmtLabel)
+            if match is not None:
+                matchList.append((match.groups(),i))
+        
+        # This is the core of where we decide how to sort the pieces.
+        #TODO: Make this better.
+        for match in matchList:
+            if (match[0][0] is not None) and  (match[0][0] in song.composer):
+                continue
+            
+            song.pieceLabel = match[0][0]
+            song.mvmtLabel = match[0][-1]
+            #toptitle = (song.album, m[0][0], m[0][1])
+            #subtitle = (song.discNum, song.trackNum, m[0][-1])
+            ret = True
+            break
+        else:
+            ret = False
+            
+        #else:
+        #    toptitle = (song['album'], fulltitle, -1)
+        #    subtitle = (song['discNumber'], song['trackNumber'], -1)
+        
+        return ret
     
     def getPieceDict(self, songList = None, **criteria):
         '''
@@ -68,8 +121,6 @@ class ClassyMixer(object):
         There are three regex patterns used to pick out these pieces.
         
         INPUTS: 
-        (Note: please provide only one. songList takes precedence. If neither is
-        provided, then the entire library will be used.)
         songList -- (default None) a list of song data compiled by the user. This 
                     must at least have the entries: 'album', 'title', and 
                     'trackNumber'.
@@ -85,51 +136,43 @@ class ClassyMixer(object):
         # Get the songList, if not provided.
         songList = self.getList(initSongList = songList, **criteria)
         
-        # Define the regex patterns to pick out movements of larger pieces.
-        pattList = []
-        # With numbers (including roman numerals)
-        pattList.append(re.compile("(.*) *?(?:[-:]|^) *?(\d+)[.:]? *?(.*)$"))
-        pattList.append(re.compile("(.*) *?(?:[-:]|^) *?([IVX]+)[^\w]+?(\w+.*)$"))
-        # Without numbers
-        pattList.append(re.compile("(.*) *?([:;]) *?(\w+.*)$"))
-        pattList.append(re.compile("(.*)( +?- *?| *?- +?)(\w+.*)$"))
-        
-        # Build the songDict.
-        songDict = {}
-        for song in songList:
-            # Get the full title.
-            fulltitle = song['title']
-            
-            # Get the matches to the patterns. Only keep the ones where we
-            # actually got a match.
-            mList = []
-            for i, patt in enumerate(pattList):
-                m = patt.match(fulltitle)
-                if m is not None:
-                    mList.append((m.groups(),i))
-            
-            # This is the core of where we decide how to sort the pieces.
-            #TODO: Make this better.
-            for m in mList:
-                if (m[0][0] is not None) and  (m[0][0] in song['composer']):
-                    continue
+        def recursiveSort(songList, level):
+            # Build the songDict.
+            songDict = {}
+            for song in songList:
+                if isinstance(song, dict):
+                    print song
+                # Get the full title.
+                if level:
+                    self.analyzeTitle(song, self.pattList[:2])
+                else:
+                    self.analyzeTitle(song, self.pattList)
                 
-                toptitle = (song['album'], mList[0][0][0], mList[0][1])
-                subtitle = (song['discNumber'], song['trackNumber'], mList[0][0][-1])
-                break
+                # Check if a pieceLabel was defined.
+                if song.pieceLabel is None:
+                    lastKey = song.mvmtLabel
+                else:
+                    lastKey = song.pieceLabel
                 
-            else:
-                toptitle = (song['album'], fulltitle, -1)
-                subtitle = (song['discNumber'], song['trackNumber'], -1)
+                # Here we actually make the entry in the dict.
+                key = (song.album, song.discNum, lastKey)
+                if songDict.has_key(key):
+                    songDict[key].append(song)
+                else:
+                    songDict[key] = [song]
             
-            # Here we actually make the entry in the dict.
-            entry = (subtitle, song['id'])
-            if songDict.has_key(toptitle):
-                songDict[toptitle].append(entry)
-            else:
-                songDict[toptitle] = [entry]
+            keys = songDict.keys()
+            #NOTE:this could backfire if the entire collection was identified as one piece.
+            # The idea is that if I can't break it down any further, stop trying.
+            if len(keys) > 1: 
+                for key in keys:
+                    if len(songDict[key]) > 5:
+                        mvmtList = songDict.pop(key)
+                        songDict.update(recursiveSort(mvmtList, level + 1))
+            
+            return songDict
         
-        return songDict
+        return recursiveSort(songList, 0)
     
     def mix(self, name, numPieces, *args, **kwargs):
         '''
@@ -167,11 +210,11 @@ class ClassyMixer(object):
         playlist = []
         for toptitle in lop[:numPieces]:
             subList = []
-            for subtitle, sid in songDict[toptitle]:
-                subList.append((subtitle, sid))
+            for song in songDict[toptitle]:
+                subList.append(song)
             subList.sort()
-            for _, sid in subList:
-                playlist.append(sid)
+            for song in subList:
+                playlist.append(song)
         
         # Now actually create the playlist.
         self.collection.writePlaylist(name, playlist, update)
