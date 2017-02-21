@@ -57,7 +57,7 @@ environment and type:
 
 ```python
   import classyMixer
-  mixer = classyMixer.ClassyMixer() # You will be prompted for username and password, and it will then complain the Python 3 is better.
+  mixer = classyMixer.ClassyMixer(classyMixer.GooglePlayCollection) # You will be prompted for username and password, and it will then complain that Python 3 is better.
   mixer.mix('Classy playlist', 100, genre='Classical')
 ```
 
