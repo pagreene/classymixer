@@ -1,6 +1,6 @@
-#Classy Mixer
+# Classy Mixer
 
-Overview and Capabilities:
+## Overview and Capabilities:
 -------------------------
 Created by Patrick Greene
 
@@ -34,7 +34,7 @@ and this is an example of something that might confuse it:
 Of course for a music shuffler, especially of classical music, it is not critical
 that every piece remain together, however I do try my best.
 
-Install:
+## Install:
 -------
 
 This has only been tested on Linux, however the packages should (they claim) 
@@ -49,7 +49,7 @@ the file(s), however there are some requirements
 
 To install gmusicapi, I recommend that you download their development version [here](https://github.com/simon-weber/gmusicapi) and run `setup.py`. I have found that using `pip install` is unreliable.
 
-Usage Example:
+## Usage Example:
 -------------
 
 Suppose you want to create a playlist on google play, you would enter the ipython
