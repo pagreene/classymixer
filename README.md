@@ -1,7 +1,6 @@
 # Classy Mixer
 
 ## Overview and Capabilities:
--------------------------
 Created by Patrick Greene
 
 This is a project to create an ipython (for now) tool for creating playlists 
@@ -35,8 +34,6 @@ Of course for a music shuffler, especially of classical music, it is not critica
 that every piece remain together, however I do try my best.
 
 ## Install:
--------
-
 This has only been tested on Linux, however the packages should (they claim) 
 work in Windows and Mac as well. 
 
@@ -50,7 +47,6 @@ the file(s), however there are some requirements
 To install gmusicapi, I recommend that you download their development version [here](https://github.com/simon-weber/gmusicapi) and run `setup.py`. I have found that using `pip install` is unreliable.
 
 ## Usage Example:
--------------
 
 Suppose you want to create a playlist on google play, you would enter the ipython
 environment and type:
