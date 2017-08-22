@@ -55,7 +55,8 @@ This can be used both in the commandline and from a python session (ipython or o
 
 The commandline usage is:
 
-```python classyMixer.py <playlist_name> -n <number of pieces> -g <genre>
+```
+python classyMixer.py <playlist_name> -n <number of pieces> -g <genre>
 ```
 
 In this case, it will be assumed you want to create a playlist on google play.
