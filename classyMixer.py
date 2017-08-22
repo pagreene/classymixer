@@ -1,3 +1,6 @@
+from __future__ import absolute_import, print_function, unicode_literals
+from builtins import dict, str
+
 from songLibs import Collection, GooglePlayCollection, LocalCollection, TunesCollection
 import random
 import re
@@ -53,7 +56,7 @@ class ClassyMixer(object):
         songList = []
         for song in initSongList:
             # If any of the criteria are not met...
-            for label, crit in criteria.iteritems():
+            for label, crit in criteria.items():
                 # determine if it matches
                 data = song.__getattribute__(label)
                 if isinstance(crit, re._pattern_type):
@@ -141,7 +144,7 @@ class ClassyMixer(object):
             songDict = {}
             for song in songList:
                 if isinstance(song, dict):
-                    print song
+                    print(song)
                 # Get the full title.
                 if level:
                     self.analyzeTitle(song, self.pattList[:2])
@@ -156,7 +159,7 @@ class ClassyMixer(object):
                 
                 # Here we actually make the entry in the dict.
                 key = (song.album, song.discNum, lastKey)
-                if songDict.has_key(key):
+                if key in songDict.keys():
                     songDict[key].append(song)
                 else:
                     songDict[key] = [song]
@@ -192,7 +195,7 @@ class ClassyMixer(object):
         lop          -- the list of pieces in the order entered into the playlist
         '''
         # Get the value for update, or set it to its default.
-        if kwargs.has_key('update'):
+        if 'update' in kwargs.keys():
             update = kwargs.pop('update')
         else:
             update = False
@@ -202,7 +205,7 @@ class ClassyMixer(object):
         songDict = self.getPieceDict(*args, **kwargs)
         
         # Get the List Of Pieces (lop) and shuffle it.
-        lop = songDict.keys()
+        lop = list(songDict.keys())
         random.seed(random.randint(0,1000))
         random.shuffle(lop)
         
@@ -220,3 +223,26 @@ class ClassyMixer(object):
         self.collection.writePlaylist(name, playlist, update)
         
         return lop
+
+if __name__ == '__main__':
+    def get_value(key_set, argv):
+        found_keys = key_set.intersection(argv)
+        assert len(found_keys) <= 1, 'Multiple uses of the same key'
+        if len(found_keys) == 1:
+            idx = argv.index(list(found_keys)[0])
+            return argv[idx+1]
+        else:
+            return None
+
+    from sys import argv
+    name = argv[1]
+    genre = get_value({'-g', '--genre'}, argv)
+    N = int(get_value({'-n', '--numpieces'}, argv))
+    collect = get_value({'-c', '--collection'}, argv)
+    if collect is 'google' or collect is None:
+        Collection = GooglePlayCollection
+    else:
+        raise Exception("Unkown collection")
+
+    mixer = ClassyMixer(Collection)
+    mixer.mix(name, N, genre=genre)
